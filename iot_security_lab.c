@@ -5,6 +5,7 @@
 #include "include/wifi_conn.h"      // Funções personalizadas de conexão WiFi
 #include "include/mqtt_comm.h"      // Funções personalizadas para MQTT
 #include "include/xor_cipher.h"     // Funções de cifra XOR
+#include <time.h>                   // Biblioteca para trabalhar com tempo e datas
 
 int main() {
     // Inicializa todas as interfaces de I/O padrão (USB serial, etc.)
@@ -12,11 +13,11 @@ int main() {
     
     // Conecta à rede WiFi
     // Parâmetros: Nome da rede (SSID) e senha
-    connect_to_wifi("SSID da rede", "Senha da rede");
+    connect_to_wifi("UFC-MMA", "05142029");
 
     // Configura o cliente MQTT
     // Parâmetros: ID do cliente, IP do broker, usuário, senha
-    mqtt_setup("bitdog1", "IP do broker", "aluno", "senha123");
+    mqtt_setup("bitdog2", "192.168.0.146", "alunoA", "senha12345");
 
     // Mensagem original a ser enviada
     const char *mensagem = "26.5";
@@ -25,10 +26,18 @@ int main() {
     // Criptografa a mensagem usando XOR com chave 42
     xor_encrypt((uint8_t *)mensagem, criptografada, strlen(mensagem), 42);
 
+    // Buffer para mensagem com Timestamp
+    char buffer[32];
+
     // Loop principal do programa
     while (true) {
+        // Formata uma string JSON
+        sprintf(buffer, "{\"valor\":26.5,\"ts\":%lu}", time(NULL));
+        
         // Publica a mensagem original (não criptografada)
-        mqtt_comm_publish("escola/sala1/temperatura", mensagem, strlen(mensagem));
+        // mqtt_comm_publish("escola/sala1/temperatura", mensagem, strlen(mensagem));
+
+        mqtt_comm_publish("escola/sala1/temperatura", buffer, strlen(buffer));
         
         // Alternativa: Publica a mensagem criptografada (atualmente comentada)
         // mqtt_comm_publish("escola/sala1/temperatura", criptografada, strlen(mensagem));
